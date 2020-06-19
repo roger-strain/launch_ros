@@ -367,10 +367,11 @@ class Node(ExecuteProcess):
                 ))
             )
             raise
-        self.__final_node_name = ''
-        if self.__expanded_node_namespace not in ['', '/']:
-            self.__final_node_name += self.__expanded_node_namespace
-        self.__final_node_name += '/' + self.__expanded_node_name
+        if self.__expanded_node_name is not None and self.__expanded_node_namespace:
+            self.__final_node_name = ''
+            if self.__expanded_node_namespace not in ['', '/']:
+                self.__final_node_name += self.__expanded_node_namespace
+            self.__final_node_name += '/' + self.__expanded_node_name
         # expand parameters too
         if self.__parameters is not None:
             self.__expanded_parameter_files = []
