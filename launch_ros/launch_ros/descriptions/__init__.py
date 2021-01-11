@@ -15,6 +15,8 @@
 """descriptions Module."""
 
 from .composable_node import ComposableNode
+from .node import Node
+from .node_trait import NodeTrait
 from ..parameter_descriptions import Parameter
 from ..parameter_descriptions import ParameterFile
 from ..parameter_descriptions import ParameterValue
@@ -22,6 +24,8 @@ from ..parameter_descriptions import ParameterValue
 
 __all__ = [
     'ComposableNode',
+    'Node',
+    'NodeTrait',
     'Parameter',
     'ParameterFile',
     'ParameterValue',
