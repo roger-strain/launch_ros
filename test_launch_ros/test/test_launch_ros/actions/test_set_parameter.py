@@ -45,7 +45,7 @@ class MockContext:
         pass
 
     def perform_substitution(self, sub):
-        return sub.perform(None)
+        return sub.perform(self)
 
 
 def get_set_parameter_test_parameters():
@@ -121,7 +121,7 @@ def test_set_param_with_node():
     )
     set_param = SetParameter(name='my_param', value='my_value')
     set_param.execute(lc)
-    node._perform_substitutions(lc)
+    node._Node__node_desc._perform_substitutions(lc, [])
     expanded_parameter_arguments = node._Node__node_desc.expanded_parameter_arguments
     assert len(expanded_parameter_arguments) == 2
     param_file_path, is_file = expanded_parameter_arguments[0]

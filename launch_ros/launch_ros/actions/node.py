@@ -14,6 +14,7 @@
 
 """Module for the Node action."""
 
+from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Optional
@@ -51,6 +52,7 @@ class Node(ExecuteLocal):
         parameters: Optional[SomeParameters] = None,
         remappings: Optional[SomeRemapRules] = None,
         arguments: Optional[Iterable[SomeSubstitutionsType]] = None,
+        additional_env: Optional[Dict[SomeSubstitutionsType, SomeSubstitutionsType]] = None,
         **kwargs
     ) -> None:
         """
@@ -112,16 +114,20 @@ class Node(ExecuteLocal):
         :param: remappings ordered list of 'to' and 'from' string pairs to be
             passed to the node as ROS remapping rules
         :param: arguments list of extra arguments for the node
+        :param additional_env: Dictionary of environment variables to be added. If env was
+            None, they are added to the current environment. If not, env is updated with
+            additional_env.
         """
         self.__node_desc = NodeDescription(node_name=name, node_namespace=namespace,
-                                           parameters=parameters, remappings=remappings,
-                                           arguments=arguments)
+                                           parameters=parameters, remappings=remappings)
+        ros_exec_kwargs = {'additional_env': additional_env, 'arguments': arguments}
         self.__ros_exec = RosExecutable(package=package, executable=executable,
-                                        nodes=[self.__node_desc])
+                                        nodes=[self.__node_desc], **ros_exec_kwargs)
         super().__init__(process_description=self.__ros_exec, **kwargs)
 
-    def _perform_substitutions(self, lc: LaunchContext):
-        self.__node_desc.prepare(lc, self.__ros_exec)
+    def prepare(self, context: LaunchContext):
+        self.__node_desc.prepare(context, self.__ros_exec, self)
+        super().prepare(context)
 
     def is_node_name_fully_specified(self):
         return self.__node_desc.is_node_name_fully_specified()
@@ -193,6 +199,10 @@ class Node(ExecuteLocal):
     def parse(cls, entity: Entity, parser: Parser):
         """Parse node."""
         # See parse method of `ExecuteProcess`
+        # Note: This class originally was a direct descendant of ExecuteProcess,
+        # but has been refactored to better divide the concept of a node vs an
+        # executable process. This class remains as a compatibility layer, and
+        # must hand off parsing duties to its original ancestor.
         _, kwargs = ExecuteProcess.parse(entity, parser, ignore=['cmd'])
         args = entity.get_attr('args', optional=True)
         if args is not None:
